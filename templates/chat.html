@@ -39,21 +39,20 @@
 
         function sendUserInput() {
             var userInput = document.getElementById('user-input').value;
-            fetch('/process_chat', {
+            fetch('/api/process_chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: 'user_input=' + encodeURIComponent(userInput)
+                body: JSON.stringify({ user_input: userInput })
             })
-            .then(response => response.text())
+            .then(response => response.json())
             .then(data => {
-                if (data.includes('<ul')) {
+                if (data.response) {
                     appendChat("user", userInput);
-                    displayOptions(data);
+                    appendChat("robot", data.response);
                 } else {
-                    appendChat("user", userInput);
-                    appendChat("robot", data);
+                    console.error('Error:', data.error);
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -69,39 +68,6 @@
             document.getElementById('user-input').value = ''; // Clear input field after sending
             chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom of chat
         }
-
-        function displayOptions(optionsHtml) {
-            var chatContainer = document.getElementById('chat-container');
-            var optionsContainer = document.createElement('div');
-            optionsContainer.classList.add('chat-bubble', 'robot');
-            optionsContainer.innerHTML = optionsHtml;
-            chatContainer.appendChild(optionsContainer);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom of chat
-
-            // Add event listeners for options
-            document.querySelectorAll('.option').forEach(option => {
-                option.addEventListener('click', function() {
-                    sendOption(option.textContent);
-                });
-            });
-        }
-
-        function sendOption(option) {
-            appendChat("user", option);
-            fetch('/process_chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'user_input=' + encodeURIComponent(option)
-            })
-            .then(response => response.text())
-            .then(data => {
-                appendChat("robot", data);
-            })
-            .catch(error => console.error('Error:', error));
-        }
     </script>
 </body>
 </html>
-
