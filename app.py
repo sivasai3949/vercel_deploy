@@ -44,8 +44,8 @@ def process_chat():
             if question_index < len(questions):
                 return jsonify({"response": questions[question_index]})
             else:
-                options_html = render_template('chat.html', options=options)
-                return jsonify({"response": chat_html})
+                options_html = render_template('options.html', options=options)
+                return jsonify({"response": options_html})
         else:
             bot_response = get_ai_response(user_input)
             return jsonify({"response": bot_response})
