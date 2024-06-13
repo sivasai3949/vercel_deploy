@@ -1,7 +1,7 @@
-from flask import Flask, jsonify, request, session, render_template
+from flask import Flask, render_template, request, session
 import openai
-import os
 from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 
@@ -32,9 +32,9 @@ def home():
     session['user_responses'] = []
     return render_template('chat.html', initial_question=questions[0])
 
-@app.route('/api/process_chat', methods=['POST'])
+@app.route('/process_chat', methods=['POST'])
 def process_chat():
-    user_input = request.json.get('user_input')
+    user_input = request.form.get('user_input')
     if user_input:
         question_index = session.get('question_index', 0)
         if question_index < len(questions):
@@ -42,14 +42,14 @@ def process_chat():
             question_index += 1
             session['question_index'] = question_index
             if question_index < len(questions):
-                return jsonify({"response": questions[question_index]})
+                return questions[question_index]
             else:
                 options_html = render_template('options.html', options=options)
-                return jsonify({"response": options_html})
+                return options_html
         else:
             bot_response = get_ai_response(user_input)
-            return jsonify({"response": bot_response})
-    return jsonify({"error": "Invalid input"}), 400
+            return bot_response
+    return "Invalid input"
 
 def get_ai_response(input_text):
     messages = [
